@@ -1,9 +1,9 @@
+from crewai import Agent
 from core.glpi import GLPIClient
 from langchain.tools import tool
-from typing import Optional, ClassVar, Any, List, Dict
+from typing import Optional, ClassVar, Any, List
+from typing import Dict
 from pydantic import ConfigDict
-from crewai import Agent
-
 
 
 class DataExtractorAgent(Agent):
