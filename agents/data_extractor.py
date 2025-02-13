@@ -22,7 +22,8 @@ class DataExtractorAgent(Agent):
             backstory="""Expert in extracting data from various sources,
             especially GLPI. Resilient to API issues and data inconsistencies.""",
             tools=[self.get_glpi_incident_details, self.get_glpi_document_content,
-                   self.get_glpi_ticket_solution, self.get_glpi_ticket_tasks],
+                self.get_glpi_ticket_solution, self.get_glpi_ticket_tasks
+            ],
             verbose=True,
             allow_delegation=False
         )
