@@ -1,4 +1,4 @@
-from crewai import Crew, Task, Process
+   from crewai import Crew, Task, Process
 from agents.data_extractor import DataExtractorAgent
 from agents.data_processor import DataProcessorAgent
 from agents.query_handler import QueryHandlerAgent
@@ -106,5 +106,68 @@ def run_autopdf(incident_id: int, update_solution: bool = False) -> str:
             generate_content_task,
             create_pdf_task,
             index_pdf_task,
-        ]),
-        process
+        ],
+        process=Process.sequential,
+        verbose=2,
+    )
+    try:
+        result = crew.kickoff()
+
+        if update_solution:
+            solution_update_result = glpi_client.update_ticket_solution(
+                incident_id, result["crew_results"][-1]
+            )
+            if solution_update_result:
+                print(f"Solution for incident {incident_id} updated successfully.")
+            else:
+                print(f"Failed to update solution for incident {incident_id}.")
+        return result
+    finally:
+        glpi_client.close_session()
+
+
+@app.post("/webhook")
+async def glpi_webhook(request: Request):
+    """Handles incoming webhooks from GLPI."""
+    try:
+        body = await request.body()
+        data = json.loads(body.decode())
+
+        if not isinstance(data, list):
+            raise HTTPException(status_code=400, detail="Invalid webhook payload format")
+
+        for event in data:
+            if "event" not in event or "itemtype" not in event or "items_id" not in event:
+                raise HTTPException(status_code=400, detail="Missing required fields in event")
+
+            if event["itemtype"] == "Ticket":
+                incident_id = int(event["items_id"])
+
+                if event["event"] in ("add", "update"):
+                    print("*" * 50)
+                    print(f"Received event: {event['event']} for Ticket ID: {incident_id}")
+                    print("*" * 50)
+                    if event["event"] == "update":
+                        run_autopdf(incident_id, update_solution=True)
+                    else:
+                        run_autopdf(incident_id, update_solution=False)
+                else:
+                    print(f"Ignoring event type: {event['event']} for Ticket")
+
+        return {"message": "Webhook received and processed"}
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON payload")
+    except Exception as e:
+        print(f"Error in webhook: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
+
+
+@app.get("/")
+async def root():
+    return {"message": "AutoPDF is running!"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port="8000")
