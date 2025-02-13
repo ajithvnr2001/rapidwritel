@@ -13,11 +13,19 @@ import json
 
 app = FastAPI()
 
-# Initialize GLPI client OUTSIDE the function
+# Initialize GLPI client OUTSIDE the function (as before)
 glpi_client = GLPIClient()
 
 # Initialize agents, passing glpi_client to DataExtractorAgent.
-data_extractor_agent = DataExtractorAgent(glpi_client=glpi_client)  # CORRECT
+# CORRECT INITIALIZATION: Pass glpi_client as a keyword argument in super().__init__
+data_extractor_agent = DataExtractorAgent(glpi_client=glpi_client, # Pass as keyword argument
+    role='Data Extractor', # Redundant here, but for clarity
+    goal='Retrieve and validate raw data from GLPI',
+    backstory="""Expert in extracting data from various sources,
+    especially GLPI. Resilient to API issues and data inconsistencies.""",
+    verbose=True,
+    allow_delegation=False
+)
 data_processor_agent = DataProcessorAgent()
 query_handler_agent = QueryHandlerAgent()
 pdf_generator_agent = PDFGeneratorAgent()
