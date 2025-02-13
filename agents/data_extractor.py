@@ -13,7 +13,7 @@ class DataExtractorAgent(Agent):
     get_glpi_document_content: ClassVar[Any]
     get_glpi_ticket_solution: ClassVar[Any]
     get_glpi_ticket_tasks: ClassVar[Any]
-    glpi_client: GLPIClient
+    #glpi_client: GLPIClient #Remove this line
 
     def __init__(self, glpi_client: GLPIClient):
         super().__init__(
