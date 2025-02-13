@@ -106,5 +106,5 @@ def run_autopdf(incident_id: int, update_solution: bool = False) -> str:
             generate_content_task,
             create_pdf_task,
             index_pdf_task,
-        ],
+        ]),
         process
