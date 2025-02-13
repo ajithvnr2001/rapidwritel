@@ -17,15 +17,15 @@ app = FastAPI()
 glpi_client = GLPIClient()
 
 # Initialize agents, passing glpi_client to DataExtractorAgent.
-data_extractor_agent = DataExtractorAgent(
-    glpi_client=glpi_client,  # Pass as keyword argument
-    role="Data Extractor",  # Redundant here, but for clarity
-    goal="Retrieve and validate raw data from GLPI",
-    backstory="""Expert in extracting data from various sources,
-                    especially GLPI. Resilient to API issues and data inconsistencies.""",
-    verbose=True,
-    allow_delegation=False,
-    )
+# CORRECT INITIALIZATION: Pass glpi_client as a positional argument and set other attributes directly
+data_extractor_agent = DataExtractorAgent(glpi_client=glpi_client)  # Pass ONLY glpi_client (positional)
+data_extractor_agent.role = 'Data Extractor'
+data_extractor_agent.goal = 'Retrieve and validate raw data from GLPI'
+data_extractor_agent.backstory = """Expert in extracting data from various sources,
+            especially GLPI. Resilient to API issues and data inconsistencies."""
+data_extractor_agent.verbose = True
+data_extractor_agent.allow_delegation = False
+
 data_processor_agent = DataProcessorAgent()
 query_handler_agent = QueryHandlerAgent()
 pdf_generator_agent = PDFGeneratorAgent()
