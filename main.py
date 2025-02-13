@@ -11,22 +11,21 @@ from fastapi import FastAPI, Request, HTTPException
 from datetime import datetime
 import json
 
-
 app = FastAPI()
+
+# Initialize GLPI client OUTSIDE the function
+glpi_client = GLPIClient()
+
+# Initialize agents, passing glpi_client to DataExtractorAgent.
+data_extractor_agent = DataExtractorAgent(glpi_client=glpi_client)  # CORRECT
+data_processor_agent = DataProcessorAgent()
+query_handler_agent = QueryHandlerAgent()
+pdf_generator_agent = PDFGeneratorAgent()
+search_indexer_agent = SearchIndexerAgent()
 
 
 def run_autopdf(incident_id: int, update_solution: bool = False) -> str:
     """Runs the AutoPDF workflow for a given incident ID."""
-
-    # Initialize GLPI client INSIDE the function
-    glpi_client = GLPIClient()
-
-    # Initialize agents, passing glpi_client to DataExtractorAgent.
-    data_extractor_agent = DataExtractorAgent(glpi_client=glpi_client)  # CORRECT
-    data_processor_agent = DataProcessorAgent()
-    query_handler_agent = QueryHandlerAgent()
-    pdf_generator_agent = PDFGeneratorAgent()
-    search_indexer_agent = SearchIndexerAgent()
 
     extract_incident_task = Task(
         description=f"Extract details for GLPI incident ID {incident_id}",
